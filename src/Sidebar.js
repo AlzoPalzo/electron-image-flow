@@ -4,14 +4,18 @@ class Sidebar extends Component {
   mapImages = () => {
     return this.props.images.map(image => (
       <div
-        id={image.image + "-div"}
+        id={image.image + "-_-_div"}
         key={image.image}
-        className="tileContainer"
         onClick={this.handleClick}
+        className={
+          this.props.selectedImage.image === image.image
+            ? "titleContainer selected"
+            : "tileContainer"
+        }
       >
         <img
           src={image.image}
-          id={image.image + "-img}"}
+          id={image.image + "-_-_img}"}
           key={image.image}
           alt={image.tags[0]}
           className="tileImage"
@@ -21,7 +25,7 @@ class Sidebar extends Component {
   };
 
   handleClick = e => {
-    const targetImage = e.target.id.split("-div")[0];
+    const targetImage = e.target.id.split("-_-_")[0];
     const newImage = this.props.images.find(
       image => image.image === targetImage
     );

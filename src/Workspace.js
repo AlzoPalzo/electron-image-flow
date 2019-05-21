@@ -14,24 +14,26 @@ class Workspace extends Component {
   };
 
   onDirChange = e => {
-    const fs = require("fs");
-    const dir = e.target.files[0].path;
+    if (e.target.files.length > 0) {
+      const fs = require("fs");
+      const dir = e.target.files[0].path;
 
-    this.setState({
-      dir: dir
-    });
+      this.setState({
+        dir: dir
+      });
 
-    fs.readdir(dir, (err, files) => {
-      if (err) throw err;
-      this.setState(
-        {
-          files: files
-        },
-        () => {
-          this.identifyImages();
-        }
-      );
-    });
+      fs.readdir(dir, (err, files) => {
+        if (err) throw err;
+        this.setState(
+          {
+            files: files
+          },
+          () => {
+            this.identifyImages();
+          }
+        );
+      });
+    }
   };
 
   identifyImages = () => {
@@ -155,6 +157,7 @@ class Workspace extends Component {
               dir={dir}
               virtual_folders={virtual_folders}
               changeSelectedImage={this.changeSelectedImage}
+              selectedImage={selectedImage}
             />
             <img
               id="selectedImage"

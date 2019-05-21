@@ -77,6 +77,21 @@ body {
   border-radius: 4px;
 }
 
+.selected {
+  margin-left: 0.7rem;
+  height: 6rem;
+  width: 6rem;
+  position: relative;
+  margin-top: 0.4rem;
+  border-style: ridge;
+  border-color: aliceblue;
+  border-width: 0.2rem;
+  box-shadow: 0.2rem 0.1rem grey;
+  background-color: rgb(84, 86, 88);
+  animation-name: fadeIn;
+  animation-duration: 1s;
+  border-radius: 4px;
+}
 
 .tileImage {
   max-width: 6rem;
@@ -165,4 +180,23 @@ body {
 .selectedImage6 {
   max-width: 180%;
   max-height: 180%;
+}
+
+
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+#imageRail {
+  background-color: #252525;
+  padding-top: 1px;
+  padding-bottom: 0.5rem;
+  width: 8rem;
+  margin-left: 0.5rem;
 }
