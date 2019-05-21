@@ -1,7 +1,10 @@
 import React, { Component } from "react";
 
+import FileBrowser from './FileBrowser'
+
 class Sidebar extends Component {
   mapImages = () => {
+    if(this.props.images){
     return this.props.images.map(image => (
       <div
         id={image.image + "-_-_div"}
@@ -22,6 +25,7 @@ class Sidebar extends Component {
         />
       </div>
     ));
+    }
   };
 
   handleClick = e => {
@@ -36,7 +40,8 @@ class Sidebar extends Component {
     return (
       <div className="sidebar">
         <h4 id="scrollBarTitle">Image Viewer</h4>
-        <input id="tagSearch" type="search" placeholder="Search by content" />
+        <FileBrowser />
+        <input id="tagSearch" type="search" placeholder="Search by content" onChange={this.props.updateSearchTerm} value={this.props.searchTerm} />
         <div id="imageRail">{this.mapImages()}</div>
       </div>
     );

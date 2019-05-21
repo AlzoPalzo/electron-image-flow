@@ -2,15 +2,17 @@ import React, { Component } from "react";
 
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import EditingBar from './EditingBar'
 
 class Workspace extends Component {
   state = {
     dir: "",
     files: [],
     images: [],
-    virtual_folders: [],
+    virtual_folders: [{name: "main", folder_id: 0, folder_location: 0}],
     selectedImage: null,
-    zoom: 0
+    zoom: 0,
+    searchTerm: "",
   };
 
   onDirChange = e => {
@@ -24,9 +26,10 @@ class Workspace extends Component {
 
       fs.readdir(dir, (err, files) => {
         if (err) throw err;
+        let newFiles = files.filter(file => !this.state.files.includes(file))
         this.setState(
           {
-            files: files
+            files: newFiles
           },
           () => {
             this.identifyImages();
@@ -124,10 +127,10 @@ class Workspace extends Component {
         }
         this.state.selectedImage
           ? this.setState({
-              images: [...this.state.images, { image: image, tags: tags }]
+              images: [...this.state.images, { image: image, tags: tags, folder_id: 0 }]
             })
           : this.setState({
-              images: [...this.state.images, { image: image, tags: tags }],
+              images: [...this.state.images, { image: image, tags: tags, folder_id: 0 }],
               selectedImage: { image: image, tags: tags }
             });
       });
@@ -145,6 +148,23 @@ class Workspace extends Component {
     });
   };
 
+  updateSearchTerm = e =>
+  {
+    this.setState({
+      searchTerm: e.target.value
+    })
+  }
+
+  filterImages = () =>
+  {
+    let newImages = []
+    if(this.state.images){
+      newImages = this.state.images.filter(image => image.tags.includes(this.state.searchTerm.toLowerCase()))
+    }
+    if(newImages.length > 0){return newImages}
+    else{return this.state.images}
+  }
+
   render() {
     const { dir, images, virtual_folders, selectedImage, zoom } = this.state;
     return (
@@ -153,7 +173,9 @@ class Workspace extends Component {
         {dir !== "" && images.length > 0 ? (
           <div>
             <Sidebar
-              images={images}
+              searchTerm={this.props.searchTerm}
+              updateSearchTerm={this.updateSearchTerm}
+              images={this.filterImages()}
               dir={dir}
               virtual_folders={virtual_folders}
               changeSelectedImage={this.changeSelectedImage}
@@ -164,6 +186,10 @@ class Workspace extends Component {
               className={"selectedImage" + zoom}
               src={selectedImage.image}
               alt={selectedImage.tags[0]}
+            />
+            <EditingBar
+              changeZoom={this.changeZoom}
+              zoom={this.state.zoom}
             />
           </div>
         ) : null}

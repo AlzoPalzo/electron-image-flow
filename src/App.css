@@ -50,10 +50,6 @@
   z-index: 1;
 }
 
-#img{
-  max-width: 400px;
-}
-
 
 body {
   background-color: #252525;
@@ -62,7 +58,7 @@ body {
 
 
 .tileContainer {
-  margin-left: 0.7rem;
+  margin-left: 0.75rem;
   height: 6rem;
   width: 6rem;
   position: relative;
@@ -77,8 +73,12 @@ body {
   border-radius: 4px;
 }
 
+.tileContainer:hover{
+  cursor: pointer
+}
+
 .selected {
-  margin-left: 0.7rem;
+  margin-left: 0.75rem;
   height: 6rem;
   width: 6rem;
   position: relative;
@@ -198,5 +198,57 @@ body {
   padding-top: 1px;
   padding-bottom: 0.5rem;
   width: 8rem;
-  margin-left: 0.5rem;
+  margin-left: 0.7rem;
+}
+
+
+
+.editingBar {
+  position: fixed;
+  bottom: 4rem;
+  right: 4rem;
+  background-color: rgb(65, 66, 66) !important;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.editingButton {
+  background-color: grey;
+  border: outset rgb(99, 98, 98);
+  color: rgb(0, 0, 0);
+  border-radius: 4px;
+  outline: 0;
+}
+
+.editingButton:hover{
+  cursor: pointer;
+}
+
+.editingButtonShaded {
+  background-color: grey;
+  border: inset rgb(99, 98, 98);
+  color: rgb(0, 0, 0);
+  border-radius: 4px;
+  outline: 0;
+}
+
+.editingButton:active{
+  border: inset rgb(99, 98, 98);
+}
+
+#tagSearch {
+  margin-bottom: 0.5rem;
+}
+#fileBrowser {
+  width: 10rem;
+  min-height: 3rem;
+  border-top: ridge rgb(99, 98, 98);
+  border-bottom: ridge rgb(99, 98, 98);
+}
+
+#fileBrowserRail{
+  background-color: #252525;
+  width: 8rem;
+  min-height: 10rem;
+  margin-left: 0.7rem;
 }
