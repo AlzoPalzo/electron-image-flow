@@ -19,15 +19,72 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+
+.sidebar {
+  height: 95%;
+  margin-top: 3.5rem;
+  width: 10rem;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgb(70, 69, 68);
+  overflow-x: hidden;
+  border-right-style: ridge;
+  border-right-color: #313030;
+  border-right-width: 0.3rem;
+
+  animation-name: fadeIn;
+  animation-duration: 1s;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+
+
+#header {
+  width: 100%;
+  height: 3.2rem;
+  position: fixed;
+  top: 0;
+  background-color: rgb(82, 80, 80);
+  border-bottom: ridge 0.5rem rgb(48, 49, 49);
+  z-index: 1;
+}
+
+#img{
+  max-width: 400px;
+}
+
+
+body {
+  background-color: #252525;
+  overflow: auto;
+}
+
+
+.tileContainer {
+  margin-left: 0.7rem;
+  height: 6.5rem;
+  width: 6.5rem;
+  position: relative;
+  margin-top: 0.4rem;
+  border-style: ridge;
+  border-color: rgb(61, 61, 61);
+  border-width: 0.2rem;
+  box-shadow: 0.2rem 0.1rem;
+  background-color: rgb(84, 86, 88);
+  animation-name: fadeIn;
+  animation-duration: 1s;
+  border-radius: 4px;
+}
+
+
+.tileImage {
+  max-width: 6rem;
+  max-height: 6rem;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
 }
