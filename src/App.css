@@ -63,8 +63,8 @@ body {
 
 .tileContainer {
   margin-left: 0.7rem;
-  height: 6.5rem;
-  width: 6.5rem;
+  height: 6rem;
+  width: 6rem;
   position: relative;
   margin-top: 0.4rem;
   border-style: ridge;
@@ -87,4 +87,82 @@ body {
   top: 0;
   bottom: 0;
   margin: auto;
+}
+
+#selectedImage {
+  animation-name: fadeIn;
+  animation-duration: 1s;
+
+  position: absolute;
+  left: 10%;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+
+
+.selectedImage-6 {
+  max-width: 46%;
+  max-height: 46%;
+}
+
+.selectedImage-5 {
+  max-width: 53%;
+  max-height: 53%;
+}
+
+.selectedImage-4 {
+  max-width: 60%;
+  max-height: 60%;
+}
+
+.selectedImage-3 {
+  max-width: 67%;
+  max-height: 67%;
+}
+
+.selectedImage-2 {
+  max-width: 74%;
+  max-height: 74%;
+}
+
+.selectedImage-1 {
+  max-width: 81%;
+  max-height: 81%;
+}
+
+.selectedImage0 {
+  max-width: 88%;
+  max-height: 88%;
+}
+
+.selectedImage1 {
+  max-width: 95%;
+  max-height: 95%;
+}
+
+.selectedImage2 {
+  max-width: 105%;
+  max-height: 105%;
+}
+
+.selectedImage3 {
+  max-width: 115%;
+  max-height: 115%;
+}
+
+.selectedImage4 {
+  max-width: 135%;
+  max-height: 135%;
+}
+
+.selectedImage5 {
+  max-width: 155%;
+  max-height: 155%;
+}
+
+.selectedImage6 {
+  max-width: 180%;
+  max-height: 180%;
 }

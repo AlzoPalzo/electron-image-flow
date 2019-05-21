@@ -2,7 +2,6 @@ import React, { Component } from "react";
 
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-import { contentTracing } from "electron";
 
 class Workspace extends Component {
   state = {
@@ -10,7 +9,8 @@ class Workspace extends Component {
     files: [],
     images: [],
     virtual_folders: [],
-    selectedImage: null
+    selectedImage: null,
+    zoom: 0
   };
 
   onDirChange = e => {
@@ -55,19 +55,44 @@ class Workspace extends Component {
   tagImage = image => {
     const fs = require("fs");
     const imageUrl = image.split("file:///")[1];
-    // let sizeOf = require("image-size");
-    // debugger
     let contents = fs.readFileSync(imageUrl);
     if (contents.length > 4000000) {
-      let img = new Image();
-      img.onLoad = e => {
-        let canvas = document.createElement("canvas"),
-          ctx = canvas.getContext("2d");
-
-        
-      };
-      img.src = image;
+      this.resize(image);
     } else this.fetchTags(image, contents);
+  };
+
+  resize = (image, dataUri = image) => {
+    let img = new Image();
+    img.onload = e => {
+      let canvas = document.createElement("canvas"),
+        ctx = canvas.getContext("2d");
+
+      const newWidth = img.width / 2;
+      const newHeight = img.height / 2;
+
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+      const newDataUri = canvas.toDataURL("image/jpeg", 1.0);
+
+      const byteChars = atob(newDataUri.split(",")[1]);
+
+      const charAry = new Array(byteChars.length);
+
+      const byteArr = new Uint8Array(charAry);
+
+      if (byteArr.length > 4000000) {
+        this.resize(image, newDataUri);
+      } else {
+        for (let i = 0; i < byteArr.length; i++) {
+          byteArr[i] = byteChars.charCodeAt(i);
+        }
+        this.fetchTags(image, byteArr);
+      }
+    };
+    img.src = dataUri;
   };
 
   fetchTags = (image, imageData) => {
@@ -87,6 +112,7 @@ class Workspace extends Component {
       .then(resp => resp.json())
       .then(tagsContainer => {
         let tags = [];
+        console.log(tagsContainer);
         if (tagsContainer.tags) {
           tags = tagsContainer.tags
             .filter(tag => tag.confidence > 0.75)
@@ -94,7 +120,6 @@ class Workspace extends Component {
         } else {
           tags = ["untaggable"];
         }
-
         this.state.selectedImage
           ? this.setState({
               images: [...this.state.images, { image: image, tags: tags }]
@@ -106,20 +131,39 @@ class Workspace extends Component {
       });
   };
 
+  changeSelectedImage = image => {
+    this.setState({
+      selectedImage: image
+    });
+  };
+
+  changeZoom = zoom => {
+    this.setState({
+      zoom: zoom
+    });
+  };
+
   render() {
-    const { dir, images, virtual_folders } = this.state;
+    const { dir, images, virtual_folders, selectedImage, zoom } = this.state;
     return (
       <div>
         <Header onDirChange={this.onDirChange} />
-        {/* {dir !== "" && images.length > 0 ? (
+        {dir !== "" && images.length > 0 ? (
           <div>
             <Sidebar
               images={images}
               dir={dir}
               virtual_folders={virtual_folders}
+              changeSelectedImage={this.changeSelectedImage}
+            />
+            <img
+              id="selectedImage"
+              className={"selectedImage" + zoom}
+              src={selectedImage.image}
+              alt={selectedImage.tags[0]}
             />
           </div>
-        ) : null} */}
+        ) : null}
       </div>
     );
   }
