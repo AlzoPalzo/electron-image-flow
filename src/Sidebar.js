@@ -3,6 +3,11 @@ import React, { Component } from "react";
 import FileBrowser from "./FileBrowser";
 
 class Sidebar extends Component {
+  state = {
+    newFolderPopup: false,
+    newFolderName: ""
+  };
+
   mapImages = () => {
     if (this.props.images.length > 0) {
       if (
@@ -12,7 +17,7 @@ class Sidebar extends Component {
       ) {
         this.props.changeSelectedImage(this.props.images[0]);
       }
-      this.checkHighlighted()
+      this.checkHighlighted();
       return this.props.images.map(image => (
         <div
           id={image.image + "-_-_div"}
@@ -32,25 +37,19 @@ class Sidebar extends Component {
     }
   };
 
-  checkHighlighted = () =>
-  {
-    if (this.props.highlightedImages.length > 0)
-    {
-      const imageNames = this.props.images.map(image => image.image)
-      const highNames = this.props.highlightedImages.map(image => image.image)
+  checkHighlighted = () => {
+    if (this.props.highlightedImages.length > 0) {
+      const imageNames = this.props.images.map(image => image.image);
+      const highNames = this.props.highlightedImages.map(image => image.image);
 
       for (let i = 0; i < highNames.length; i++) {
-        if(!imageNames.includes(highNames[i]))
-        {
-          this.props.resetHighlighted()
+        if (!imageNames.includes(highNames[i])) {
+          this.props.resetHighlighted();
           break;
         }
       }
-
     }
-
-
-  }
+  };
 
   getImageClass = image => {
     if (this.props.selectedImage.image === image.image) {
@@ -80,17 +79,37 @@ class Sidebar extends Component {
     }
   };
 
+  showPopup = () => {
+    this.setState({
+      newFolderPopup: !this.state.newFolderPopup
+    });
+  };
 
-  handleAddFolder = () =>
-  {
-    this.props.addFolder()
-  }
+  updateFolderName = e => {
+    this.setState({
+      newFolderName: e.target.value
+    });
+  };
+
+  addFolder = e => {
+    e.preventDefault();
+    if (this.state.newFolderName !== "") {
+      this.props.addFolder(this.state.newFolderName);
+      this.setState({
+        newFolderPopup: false,
+        newFolderName: ""
+      });
+    } else {
+      alert("Must have a name");
+    }
+  };
 
   render() {
     return (
       <div className="sidebar">
         <h4 id="scrollBarTitle">Image Viewer</h4>
         <FileBrowser
+          changeSelectedFolder={this.props.changeSelectedFolder}
           selectedFolder={this.props.selectedFolder}
           virtualFolders={this.props.virtualFolders}
         />
@@ -101,7 +120,32 @@ class Sidebar extends Component {
           onChange={this.props.updateSearchTerm}
           value={this.props.searchTerm}
         />
-        <button onClick={this.handleAddFolder}>Create Folder</button>
+
+        {this.state.newFolderPopup ? (
+          <div>
+            <button onClick={this.showPopup}>Create Folder</button>
+            <form id="newFolderPopup">
+              <input
+                autoFocus
+                required
+                name="name"
+                type="text"
+                label="name"
+                placeholder="Folder Name"
+                id="folderNameInput"
+                onChange={this.updateFolderName}
+                value={this.state.newFolderName}
+              />
+              <input
+                className="submit"
+                onClick={this.addFolder}
+                type="submit"
+              />
+            </form>
+          </div>
+        ) : (
+          <button onClick={this.showPopup}>Create Folder</button>
+        )}
         <div id="imageRailBorder">
           <div id="imageRail">{this.mapImages()}</div>
         </div>

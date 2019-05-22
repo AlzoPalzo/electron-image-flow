@@ -14,7 +14,8 @@ class Workspace extends Component {
     selectedImage: null,
     highlightedImages: [],
     zoom: 0,
-    searchTerm: ""
+    searchTerm: "",
+    folderUniqueId: 1
   };
 
   onDirChange = e => {
@@ -127,19 +128,20 @@ class Workspace extends Component {
         } else {
           tags = ["untaggable"];
         }
+        const newImage = { image: image, tags: tags, folderLocation: 0 };
         this.state.selectedImage
           ? this.setState({
               images: [
                 ...this.state.images,
-                { image: image, tags: tags, folderLocation: 0 }
+                newImage
               ]
             })
           : this.setState({
               images: [
                 ...this.state.images,
-                { image: image, tags: tags, folderLocation: 0 }
+                newImage
               ],
-              selectedImage: { image: image, tags: tags }
+              selectedImage: newImage
             });
       });
   };
@@ -165,14 +167,16 @@ class Workspace extends Component {
   filterImages = () => {
     let newImages = [];
     if (this.state.images) {
-      newImages = this.state.images.filter(image =>
-        image.tags.includes(this.state.searchTerm.toLowerCase())
+      newImages = this.state.images.filter(
+        image =>
+          image.tags.includes(this.state.searchTerm.toLowerCase()) &&
+          image.folderLocation === this.state.selectedFolder.folderId
       );
     }
     if (newImages.length > 0) {
       return newImages;
     } else {
-      return this.state.images;
+      return this.state.images.filter(image => image.folderLocation === this.state.selectedFolder.folderId);
     }
   };
 
@@ -180,8 +184,10 @@ class Workspace extends Component {
     if (this.state.selectedImage.image !== image.image) {
       if (this.state.highlightedImages.includes(image)) {
         this.setState({
-          highlightedImages: this.state.highlightedImages.filter(img => img !== image)
-        })
+          highlightedImages: this.state.highlightedImages.filter(
+            img => img !== image
+          )
+        });
       } else {
         this.setState({
           highlightedImages: [...this.state.highlightedImages, image]
@@ -196,9 +202,43 @@ class Workspace extends Component {
     });
   };
 
-  addFolder = () =>
+  addFolder = name => {
+    const { highlightedImages, selectedImage, images } = this.state;
+    let highNames = [];
+    let filteredImages = [];
+    if (highlightedImages.length > 0) {
+      highNames = highlightedImages.map(image => image.image);
+      filteredImages = images.filter(
+        image =>
+          highNames.includes(image.image) || image.image === selectedImage.image
+      );
+    } else {
+      filteredImages = [selectedImage];
+    }
+    const newFolder = {
+      name: name,
+      folderId: this.state.folderUniqueId,
+      folderLocation: selectedImage.folderLocation
+    };
+    filteredImages.forEach(
+      image => (image.folderLocation = this.state.folderUniqueId)
+    );
+
+    this.setState({
+      virtualFolders: [...this.state.virtualFolders, newFolder],
+      folderUniqueId: this.state.folderUniqueId + 1
+    });
+  };
+
+  changeSelectedFolder = e =>
   {
-    debugger
+    const targetFolderId = e.target.id.split('folder')[1]
+    const newSelectedFolder = this.state.virtualFolders.find(folder => folder.folderId = targetFolderId)
+
+    this.setState({
+      selectedFolder: newSelectedFolder
+    }, console.log(this.state.selectedFolder))
+    
   }
 
   render() {
@@ -225,6 +265,7 @@ class Workspace extends Component {
               changeSelectedImage={this.changeSelectedImage}
               selectedImage={selectedImage}
               selectedFolder={selectedFolder}
+              changeSelectedFolder={this.changeSelectedFolder}
               highlightedImages={highlightedImages}
               highlightImage={this.highlightImage}
               resetHighlighted={this.resetHighlighted}
