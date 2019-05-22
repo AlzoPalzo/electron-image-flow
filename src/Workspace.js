@@ -178,17 +178,28 @@ class Workspace extends Component {
 
   highlightImage = image => {
     if (this.state.selectedImage.image !== image.image) {
-      this.setState({
-        highlightedImages: [...this.state.highlightedImages, image]
-      });
+      if (this.state.highlightedImages.includes(image)) {
+        this.setState({
+          highlightedImages: this.state.highlightedImages.filter(img => img !== image)
+        })
+      } else {
+        this.setState({
+          highlightedImages: [...this.state.highlightedImages, image]
+        });
+      }
     }
   };
 
   resetHighlighted = () => {
     this.setState({
       highlightedImages: []
-    })
+    });
   };
+
+  addFolder = () =>
+  {
+    debugger
+  }
 
   render() {
     const {
@@ -217,6 +228,7 @@ class Workspace extends Component {
               highlightedImages={highlightedImages}
               highlightImage={this.highlightImage}
               resetHighlighted={this.resetHighlighted}
+              addFolder={this.addFolder}
             />
             <img
               id="selectedImage"

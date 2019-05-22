@@ -93,6 +93,7 @@ body {
 }
 
 .highlighted {
+  box-shadow: 0.2rem 0.1rem rgb(78, 78, 78);
   border-color: rgb(168, 166, 166);
 }
 
@@ -105,6 +106,7 @@ body {
   top: 0;
   bottom: 0;
   margin: auto;
+  -webkit-user-select: none;
 }
 
 #selectedImage {
