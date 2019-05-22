@@ -40,9 +40,9 @@ class Sidebar extends Component {
     return (
       <div className="sidebar">
         <h4 id="scrollBarTitle">Image Viewer</h4>
-        <FileBrowser />
+        <FileBrowser selectedFolder={this.props.selectedFolder} virtualFolders={this.props.virtualFolders}/>
         <input id="tagSearch" type="search" placeholder="Search by content" onChange={this.props.updateSearchTerm} value={this.props.searchTerm} />
-        <div id="imageRail">{this.mapImages()}</div>
+        <div id="imageRailBorder"><div id="imageRail">{this.mapImages()}</div></div>
       </div>
     );
   }

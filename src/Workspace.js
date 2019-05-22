@@ -2,17 +2,19 @@ import React, { Component } from "react";
 
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-import EditingBar from './EditingBar'
+import EditingBar from "./EditingBar";
 
 class Workspace extends Component {
   state = {
     dir: "",
     files: [],
     images: [],
-    virtual_folders: [{name: "main", folder_id: 0, folder_location: 0}],
+    virtualFolders: [{ name: "main", folderId: 0, folderLocation: 0 }],
+    selectedFolder: { name: "main", folderId: 0, folderLocation: 0 },
     selectedImage: null,
+    highlightedImages: [],
     zoom: 0,
-    searchTerm: "",
+    searchTerm: ""
   };
 
   onDirChange = e => {
@@ -26,7 +28,7 @@ class Workspace extends Component {
 
       fs.readdir(dir, (err, files) => {
         if (err) throw err;
-        let newFiles = files.filter(file => !this.state.files.includes(file))
+        let newFiles = files.filter(file => !this.state.files.includes(file));
         this.setState(
           {
             files: newFiles
@@ -127,10 +129,16 @@ class Workspace extends Component {
         }
         this.state.selectedImage
           ? this.setState({
-              images: [...this.state.images, { image: image, tags: tags, folder_id: 0 }]
+              images: [
+                ...this.state.images,
+                { image: image, tags: tags, folderLocation: 0 }
+              ]
             })
           : this.setState({
-              images: [...this.state.images, { image: image, tags: tags, folder_id: 0 }],
+              images: [
+                ...this.state.images,
+                { image: image, tags: tags, folderLocation: 0 }
+              ],
               selectedImage: { image: image, tags: tags }
             });
       });
@@ -148,25 +156,50 @@ class Workspace extends Component {
     });
   };
 
-  updateSearchTerm = e =>
-  {
+  updateSearchTerm = e => {
     this.setState({
       searchTerm: e.target.value
-    })
-  }
+    });
+  };
 
-  filterImages = () =>
-  {
-    let newImages = []
-    if(this.state.images){
-      newImages = this.state.images.filter(image => image.tags.includes(this.state.searchTerm.toLowerCase()))
+  filterImages = () => {
+    let newImages = [];
+    if (this.state.images) {
+      newImages = this.state.images.filter(image =>
+        image.tags.includes(this.state.searchTerm.toLowerCase())
+      );
     }
-    if(newImages.length > 0){return newImages}
-    else{return this.state.images}
-  }
+    if (newImages.length > 0) {
+      return newImages;
+    } else {
+      return this.state.images;
+    }
+  };
+
+  highlightImage = image => {
+    if (this.state.selectedImage.image !== image.image) {
+      this.setState({
+        highlightedImages: [...this.state.highlightedImages, image]
+      });
+    }
+  };
+
+  resetHighlighted = () => {
+    this.setState({
+      highlightedImages: []
+    })
+  };
 
   render() {
-    const { dir, images, virtual_folders, selectedImage, zoom } = this.state;
+    const {
+      dir,
+      images,
+      virtualFolders,
+      selectedImage,
+      zoom,
+      selectedFolder,
+      highlightedImages
+    } = this.state;
     return (
       <div>
         <Header onDirChange={this.onDirChange} />
@@ -177,9 +210,13 @@ class Workspace extends Component {
               updateSearchTerm={this.updateSearchTerm}
               images={this.filterImages()}
               dir={dir}
-              virtual_folders={virtual_folders}
+              virtualFolders={virtualFolders}
               changeSelectedImage={this.changeSelectedImage}
               selectedImage={selectedImage}
+              selectedFolder={selectedFolder}
+              highlightedImages={highlightedImages}
+              highlightImage={this.highlightImage}
+              resetHighlighted={this.resetHighlighted}
             />
             <img
               id="selectedImage"
@@ -187,10 +224,7 @@ class Workspace extends Component {
               src={selectedImage.image}
               alt={selectedImage.tags[0]}
             />
-            <EditingBar
-              changeZoom={this.changeZoom}
-              zoom={this.state.zoom}
-            />
+            <EditingBar changeZoom={this.changeZoom} zoom={this.state.zoom} />
           </div>
         ) : null}
       </div>
