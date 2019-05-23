@@ -135,7 +135,6 @@ class Sidebar extends Component {
                 id="folderNameInput"
                 value={this.props.searchTerm}
                 onChange={this.updateFolderName}
-                value={this.state.newFolderName}
               />
               <input
                 className="submit"
