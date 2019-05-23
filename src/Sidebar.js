@@ -133,6 +133,7 @@ class Sidebar extends Component {
                 label="name"
                 placeholder="Folder Name"
                 id="folderNameInput"
+                value={this.props.searchTerm}
                 onChange={this.updateFolderName}
                 value={this.state.newFolderName}
               />

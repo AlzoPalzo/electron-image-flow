@@ -173,6 +173,8 @@ class Workspace extends Component {
           image.folderLocation === this.state.selectedFolder.folderId
       );
     }
+    console.log(this.state.selectedFolder)
+    console.log(newImages)
     if (newImages.length > 0) {
       return newImages;
     } else {
@@ -226,18 +228,19 @@ class Workspace extends Component {
 
     this.setState({
       virtualFolders: [...this.state.virtualFolders, newFolder],
+      selectedFolder: newFolder,
       folderUniqueId: this.state.folderUniqueId + 1
     });
   };
 
   changeSelectedFolder = e =>
   {
-    const targetFolderId = e.target.id.split('folder')[1]
-    const newSelectedFolder = this.state.virtualFolders.find(folder => folder.folderId = targetFolderId)
+    const targetFolderId = parseInt(e.target.id.split('folder')[1])
+    const newSelectedFolder = this.state.virtualFolders.find(folder => folder.folderId === targetFolderId)
 
     this.setState({
       selectedFolder: newSelectedFolder
-    }, console.log(this.state.selectedFolder))
+    },() => {})
     
   }
 
