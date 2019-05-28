@@ -9,14 +9,17 @@ class Workspace extends Component {
     dir: "",
     files: [],
     images: [],
-    virtualFolders: [{ name: "main", folderId: 0, folderLocation: 0 }],
-    selectedFolder: { name: "main", folderId: 0, folderLocation: 0 },
+    virtualFolders: [
+      { name: "main", folderId: 0, folderLocation: 0, open: true, depth: 0 }
+    ],
+    selectedFolder: {},
     selectedImage: null,
     highlightedImages: [],
     zoom: 0,
     searchTerm: "",
     folderUniqueId: 1
   };
+
 
   onDirChange = e => {
     if (e.target.files.length > 0) {
@@ -32,7 +35,8 @@ class Workspace extends Component {
         let newFiles = files.filter(file => !this.state.files.includes(file));
         this.setState(
           {
-            files: newFiles
+            files: newFiles,
+            selectedFolder: this.state.virtualFolders[0]
           },
           () => {
             this.identifyImages();
@@ -52,13 +56,13 @@ class Workspace extends Component {
       const filepaths = files.map(file => "file:///" + dir + "/" + file);
       images = filepaths.filter(
         filepath =>
-          path.extname(filepath) === ".jpg" || path.extname === ".jpeg"
+          path.extname(filepath).toLowerCase() === ".jpg" || path.extname(filepath).toLowerCase() === ".jpeg"
       );
     }
     images.forEach(image => {
       this.tagImage(image);
     });
-  };
+  };n
 
   tagImage = image => {
     const fs = require("fs");
@@ -120,7 +124,6 @@ class Workspace extends Component {
       .then(resp => resp.json())
       .then(tagsContainer => {
         let tags = [];
-        console.log(tagsContainer);
         if (tagsContainer.tags) {
           tags = tagsContainer.tags
             .filter(tag => tag.confidence > 0.75)
@@ -131,16 +134,10 @@ class Workspace extends Component {
         const newImage = { image: image, tags: tags, folderLocation: 0 };
         this.state.selectedImage
           ? this.setState({
-              images: [
-                ...this.state.images,
-                newImage
-              ]
+              images: [...this.state.images, newImage]
             })
           : this.setState({
-              images: [
-                ...this.state.images,
-                newImage
-              ],
+              images: [...this.state.images, newImage],
               selectedImage: newImage
             });
       });
@@ -173,12 +170,13 @@ class Workspace extends Component {
           image.folderLocation === this.state.selectedFolder.folderId
       );
     }
-    console.log(this.state.selectedFolder)
-    console.log(newImages)
+    console.log(this.state.selectedFolder);
     if (newImages.length > 0) {
       return newImages;
     } else {
-      return this.state.images.filter(image => image.folderLocation === this.state.selectedFolder.folderId);
+      return this.state.images.filter(
+        image => image.folderLocation === this.state.selectedFolder.folderId
+      );
     }
   };
 
@@ -204,6 +202,25 @@ class Workspace extends Component {
     });
   };
 
+  getDepth = () => {
+    let parents = [this.state.selectedFolder];
+    let aFolder = this.state.selectedFolder;
+    let main = false;
+    while (main === false) {
+      if (aFolder.folderId === 0) {
+        main = true;
+        break
+      }
+      aFolder = this.state.virtualFolders.find(
+        folder => folder.folderId === aFolder.folderLocation
+      );
+      if (aFolder) {
+        parents = [...parents, aFolder];
+      }
+    }
+    return parents.length;
+  };
+
   addFolder = name => {
     const { highlightedImages, selectedImage, images } = this.state;
     let highNames = [];
@@ -217,11 +234,16 @@ class Workspace extends Component {
     } else {
       filteredImages = [selectedImage];
     }
+    const depth = this.getDepth()
     const newFolder = {
       name: name,
       folderId: this.state.folderUniqueId,
-      folderLocation: selectedImage.folderLocation
+      folderLocation: selectedImage.folderLocation,
+      open: true,
+      depth: depth,
     };
+    const parent = this.state.virtualFolders.find(folder => folder.folderId === selectedImage.folderLocation)
+    if(!parent.open){this.openFolder(parent.folderId)}
     filteredImages.forEach(
       image => (image.folderLocation = this.state.folderUniqueId)
     );
@@ -233,15 +255,65 @@ class Workspace extends Component {
     });
   };
 
-  changeSelectedFolder = e =>
-  {
-    const targetFolderId = parseInt(e.target.id.split('folder')[1])
-    const newSelectedFolder = this.state.virtualFolders.find(folder => folder.folderId === targetFolderId)
+  changeSelectedFolder = id => {
+    const newSelectedFolder = this.state.virtualFolders.find(
+      folder => folder.folderId === id
+    );
 
+    this.setState(
+      {
+        selectedFolder: newSelectedFolder
+      },
+      () => {}
+    );
+  };
+
+  openFolder = (id) =>
+  {
+    const targetFolder = this.state.virtualFolders.find(folder => folder.folderId === id)
+    const filterFolders = this.state.virtualFolders.filter(folder => folder !== targetFolder)
+    targetFolder.open = !targetFolder.open
     this.setState({
-      selectedFolder: newSelectedFolder
-    },() => {})
-    
+      virtualFolders: [...filterFolders, targetFolder]
+    })
+  }
+
+  createFilePath = (file, folders = []) =>
+  {
+    let fileFolder = this.state.virtualFolders.find(folder => file.folderLocation === folder.folderId)
+    folders.unshift(fileFolder.name)
+    if (fileFolder.folderId === 0){
+      const jointFolders = this.state.dir + '/' + folders.join("/");
+      return jointFolders
+    }
+    else{
+      return this.createFilePath(fileFolder, folders)
+    }
+
+  }
+
+  export = () =>
+  {
+    const {images, dir} = this.state
+
+    const fs = require('fs')
+
+    for (let i = 0; i < images.length; i++) {
+        const imageDir = images[i].image.split('///')[1]
+        const splitImageDir = imageDir.split('/')
+        const imageName = splitImageDir[splitImageDir.length - 1]
+        const newImageFilePath = this.createFilePath(images[i])
+        const finalLoc = newImageFilePath + '/' + imageName
+
+        if(fs.existsSync(newImageFilePath))
+        {
+          fs.copyFileSync(imageDir, finalLoc)
+        }
+        else{
+          fs.mkdirSync(newImageFilePath, {recursive: true})
+          fs.copyFileSync(imageDir, finalLoc);
+        }
+    }  
   }
 
   render() {
@@ -273,6 +345,9 @@ class Workspace extends Component {
               highlightImage={this.highlightImage}
               resetHighlighted={this.resetHighlighted}
               addFolder={this.addFolder}
+              openFolder={this.openFolder}
+              unfiltered={this.state.images}
+              export={this.export}
             />
             <img
               id="selectedImage"
@@ -280,7 +355,10 @@ class Workspace extends Component {
               src={selectedImage.image}
               alt={selectedImage.tags[0]}
             />
-            <EditingBar changeZoom={this.changeZoom} zoom={this.state.zoom} />
+            <EditingBar
+              changeZoom={this.changeZoom}
+              zoom={this.state.zoom}
+            />
           </div>
         ) : null}
       </div>

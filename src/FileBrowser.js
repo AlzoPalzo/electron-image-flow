@@ -1,212 +1,110 @@
 import React, { Component } from "react";
 
 class FileBrowser extends Component {
-  getChildren = () => {
-    return this.props.virtualFolders.filter(
-      folder => folder.folderLocation === this.props.selectedFolder.folderId
-    );
-  };
-
-  getParent = () => {
-    return this.props.virtualFolders.find(
-      folder => folder.folderId === this.props.selectedFolder.folderLocation
-    );
-  };
-
-  getSiblings = () => {
-    return this.props.virtualFolders.filter(
+  getChildren = target => {
+    let children = this.props.virtualFolders.filter(
       folder =>
-        folder.folderLocation === this.props.selectedFolder.folderLocation &&
-        folder.folderId !== 0
+        folder.folderLocation === target.folderId && folder.folderId !== 0
     );
+    return children.sort((a, b) => {
+      var aName = a.name.toLowerCase();
+      var bName = b.name.toLowerCase();
+      if (aName < bName) {
+        return -1;
+      }
+      if (aName > bName) {
+        return 1;
+      }
+      return 0;
+    });
+  };
+
+  handleFolderClick = e => {
+    const folderId = parseInt(e.target.id.split("folder")[1]);
+    this.props.changeSelectedFolder(folderId);
+    this.props.openFolder(folderId);
+  };
+  handleClick = e => {
+    const folderId = parseInt(e.target.id.split("folder")[1]);
+    this.props.changeSelectedFolder(folderId);
+  };
+
+  getNumImages = folder => {
+    if (this.props.images.length > 0) {
+      const images = this.props.images.filter(
+        image => image.folderLocation === folder.folderId
+      );
+      return images.length;
+    }
+  };
+
+  renderFolder = folder => {
+    const leftPad = 0.5 * folder.depth;
+    const dynamicStyling = { paddingLeft: leftPad + "rem" };
+    return (
+      <div>
+        <div
+          className={
+            this.props.selectedFolder.folderId === folder.folderId
+              ? "folderContainer selectedFolder"
+              : "folderContainer"
+          }
+          id={"image-folder" + folder.folderId}
+          onClick={this.handleClick}
+          key={folder.folderId}
+        >
+          <p id={"count-folder" + folder.folderId} className="imageCount">
+            {"(" + this.getNumImages(folder) + ")"}
+          </p>
+          <img
+            style={dynamicStyling}
+            onClick={this.handleFolderClick}
+            src={
+              folder.open
+                ? "file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon_open.png"
+                : "file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon.png"
+            }
+            alt="folder icon"
+            id={"image-folder" + folder.folderId}
+            className="folderIcon"
+          />
+          <p id={"text-folder" + folder.folderId} className="folderText">
+            {folder.name}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  renderChildren = children => {
+    let structuredFolders = [];
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      const renderedChild = this.renderFolder(child);
+      const grandChildren = this.getChildren(child);
+
+      structuredFolders.push(renderedChild);
+
+      if (child.open && grandChildren.length > 0) {
+        structuredFolders = [
+          ...structuredFolders,
+          ...this.renderChildren(grandChildren)
+        ];
+      }
+    }
+    return structuredFolders;
   };
 
   renderFolders = () => {
-    const { selectedFolder } = this.props;
-    if (selectedFolder.folderId === 0) {
-      const childFolders = this.getChildren().filter(
-        folder => folder.name !== "main"
-      );
-      return (
-        <div>
-          <div
-            className="folderContainer selectedFolder"
-            onClick={this.props.changeSelectedFolder}
-            id={"-folder0"}
-          >
-            <img
-              id="image-folder0"
-              className="folderIcon"
-              alt="folder icon"
-              src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon.png"
-            />
-            <p id="text-folder0" className="folderText">
-              Main
-            </p>
-          </div>
-          {childFolders.length > 0 ? (
-            <div className="childFolders">
-              {childFolders.map(folder => (
-                <div
-                  onClick={this.props.changeSelectedFolder}
-                  key={"folder" + folder.folderId}
-                  id={"-folder" + folder.folderId}
-                  className="childFolderContainer"
-                >
-                  <img
-                    id={"image-folder" + folder.folderId}
-                    className="folderIcon"
-                    alt="folder icon"
-                    src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon.png"
-                  />
-                  <p
-                    id={"text-folder" + folder.folderId}
-                    className="folderText"
-                  >
-                    {folder.name}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      );
+    const { virtualFolders } = this.props;
+
+    const main = virtualFolders.find(folder => folder.folderId === 0);
+    const children = this.getChildren(main);
+
+    if (main.open && children.length > 0) {
+      return [this.renderFolder(main), ...this.renderChildren(children)];
     } else {
-      const children = this.getChildren();
-      const parent = this.getParent();
-      const siblings = this.getSiblings();
-
-      if (parent.folderId !== 0) {
-        return (
-          <div>
-            <div mainHolder>
-              <div
-                className="folderContainer"
-                onClick={this.props.changeSelectedFolder}
-                id={"-folder0"}
-              >
-                <img
-                  id="image-folder0"
-                  className="folderIcon"
-                  alt="folder icon"
-                  src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon.png"
-                />
-                <p id="text-folder0" className="folderText">
-                  Main
-                </p>
-              </div>
-            </div>
-
-            <div
-              className="parentContainer"
-              onClick={this.props.changeSelectedFolder}
-              key={"folder" + parent.folderId}
-              id={"-folder" + parent.folderId}
-            >
-              <img
-                id={"image-folder" + parent.folderId}
-                className="folderIcon"
-                alt="folder icon"
-                src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon.png"
-              />
-            </div>
-            <div className="currentFolders">
-              {siblings.map(folder => (
-                <div
-                  onClick={this.props.changeSelectedFolder}
-                  key={"folder" + folder.folderId}
-                  id={"-folder" + folder.folderId}
-                  className={
-                    folder.folderId === selectedFolder.folderId
-                      ? "folderContainer selectedFolder"
-                      : "folderContainer"
-                  }
-                />
-              ))}
-            </div>
-            {children.length > 0 ? (
-              <div className="childFolders">
-                {children.map(folder => (
-                  <div
-                    onClick={this.props.changeSelectedFolder}
-                    key={"folder" + folder.folderId}
-                    id={"-folder" + folder.folderId}
-                    className="childFolderContainer"
-                  >
-                    <img
-                      id={"image-folder" + folder.folderId}
-                      className="folderIcon"
-                      alt="folder icon"
-                      src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon.png"
-                    />
-                    <p
-                      id={"text-folder" + folder.folderId}
-                      className="folderText"
-                    >
-                      {folder.name}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        );
-      }
-
-      return (
-        <div>
-          <div
-            className="folderContainer "
-            onClick={this.props.changeSelectedFolder}
-            id={"-folder0"}
-          >
-            <img
-              id="image-folder0"
-              className="folderIcon"
-              alt="folder icon"
-              src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon.png"
-            />
-            <p id="text-folder0" className="folderText">
-              Main
-            </p>
-          </div>
-          <div className="currentFolders">
-            {siblings.map(folder => (
-              <div
-                onClick={this.props.changeSelectedFolder}
-                key={"folder" + folder.folderId}
-                id={"-folder" + folder.folderId}
-                className={
-                  folder.folderId === selectedFolder.folderId
-                    ? "folderContainer selectedFolder"
-                    : "folderContainer"
-                }
-              />
-            ))}
-          </div>
-          {children.map(folder => (
-            <div
-              onClick={this.props.changeSelectedFolder}
-              key={"folder" + folder.folderId}
-              id={"-folder" + folder.folderId}
-              className="childFolderContainer"
-            >
-              <img
-                id={"image-folder" + folder.folderId}
-                className="folderIcon"
-                alt="folder icon"
-                src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon.png"
-              />
-              <p
-                id={"text-folder" + folder.folderId}
-                className="folderText"
-              >
-                {folder.name}
-              </p>
-            </div>
-          ))}
-        </div>
-      );
+      return this.renderFolder(main);
     }
   };
 

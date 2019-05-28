@@ -112,7 +112,23 @@ class Sidebar extends Component {
           changeSelectedFolder={this.props.changeSelectedFolder}
           selectedFolder={this.props.selectedFolder}
           virtualFolders={this.props.virtualFolders}
+          openFolder={this.props.openFolder}
+          images={this.props.unfiltered}
         />
+        <div className="sideBarButtons">
+          <button className="sidebarButton">
+            <img className="sidebarButtonImage" src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/create_images_folder.jpg" />
+          </button>
+          <button className="sidebarButton">
+            <img className="sidebarButtonImage" src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/delete_folder.jpg" />
+          </button>
+          <button className="sidebarButton">
+            <img className="sidebarButtonImage" src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/delete_Image.jpg" />
+          </button>
+          <button className="sidebarButton">
+            <img className="sidebarButtonImage" src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/move_image.jpg" />
+          </button>
+        </div>
         <input
           id="tagSearch"
           type="search"
@@ -124,6 +140,7 @@ class Sidebar extends Component {
         {this.state.newFolderPopup ? (
           <div>
             <button onClick={this.showPopup}>Create Folder</button>
+              <button className="export" onClick={this.props.export}>Export</button>
             <form id="newFolderPopup">
               <input
                 autoFocus
@@ -145,7 +162,7 @@ class Sidebar extends Component {
           </div>
         ) : (
           <button onClick={this.showPopup}>Create Folder</button>
-        )}
+          )}
         <div id="imageRailBorder">
           <div id="imageRail">{this.mapImages()}</div>
         </div>
