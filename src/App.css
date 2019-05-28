@@ -327,7 +327,35 @@ body {
   border: 0.1rem outset #545454;
 }
 
+.sidebarButtonImageFalse {
+  max-width: 2.4rem;
+  padding: 0.2rem;
+  margin: 0.1rem;
+  border: 0.1rem inset #545454;
+}
 
 .sidebarButtonImage:active {
   border: 0.1rem inset #545454;
+}
+
+.export {
+  background: #545454;
+  color: aliceblue;
+  border: 0.1rem outset #545454;
+  margin-right: 0.2rem;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.export:active{
+  border: 0.1rem inset #545454;
+}
+
+.highlightExport {
+  background: #545454;
+  color: aliceblue;
+  border: 0.1rem outset #c0c0c0;
+  margin-right: 0.2rem;
+  -webkit-user-select: none;
+  outline: none;
 }

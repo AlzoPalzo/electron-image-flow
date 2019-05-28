@@ -29,6 +29,11 @@ class FileBrowser extends Component {
     this.props.changeSelectedFolder(folderId);
   };
 
+  handleMoveImages = (e) =>
+  {
+    this.props.moveImages(e)
+  }
+
   getNumImages = folder => {
     if (this.props.images.length > 0) {
       const images = this.props.images.filter(
@@ -42,7 +47,7 @@ class FileBrowser extends Component {
     const leftPad = 0.5 * folder.depth;
     const dynamicStyling = { paddingLeft: leftPad + "rem" };
     return (
-      <div>
+      <div key={folder.folderId}>
         <div
           className={
             this.props.selectedFolder.folderId === folder.folderId
@@ -50,7 +55,7 @@ class FileBrowser extends Component {
               : "folderContainer"
           }
           id={"image-folder" + folder.folderId}
-          onClick={this.handleClick}
+          onClick={this.props.moveImagesVal ? this.handleMoveImages : this.handleClick}
           key={folder.folderId}
         >
           <p id={"count-folder" + folder.folderId} className="imageCount">
@@ -58,7 +63,7 @@ class FileBrowser extends Component {
           </p>
           <img
             style={dynamicStyling}
-            onClick={this.handleFolderClick}
+            onClick={this.props.moveImagesVal ? this.handleMoveImages : this.handleFolderClick}
             src={
               folder.open
                 ? "file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/Folder_icon_open.png"

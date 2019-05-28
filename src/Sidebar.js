@@ -4,8 +4,10 @@ import FileBrowser from "./FileBrowser";
 
 class Sidebar extends Component {
   state = {
-    newFolderPopup: false,
-    newFolderName: ""
+    showPopup: false,
+    newFolderName: "",
+    popupType: "",
+    moveImages: false
   };
 
   mapImages = () => {
@@ -79,10 +81,27 @@ class Sidebar extends Component {
     }
   };
 
-  showPopup = () => {
-    this.setState({
-      newFolderPopup: !this.state.newFolderPopup
-    });
+  showPopup = e => {
+    const type = e.target.id;
+    if (e.target.id === this.state.popupType) {
+      this.setState({
+        showPopup: !this.state.showPopup
+      });
+    } else if (this.state.showPopup === true) {
+      this.setState({
+        popupType: type
+      });
+    } else {
+      this.setState({
+        showPopup: !this.state.showPopup,
+        popupType: type
+      });
+    }
+    if (this.state.moveImages) {
+      this.setState({
+        moveImages: false
+      });
+    }
   };
 
   updateFolderName = e => {
@@ -96,7 +115,7 @@ class Sidebar extends Component {
     if (this.state.newFolderName !== "") {
       this.props.addFolder(this.state.newFolderName);
       this.setState({
-        newFolderPopup: false,
+        showPopup: false,
         newFolderName: ""
       });
     } else {
@@ -104,31 +123,175 @@ class Sidebar extends Component {
     }
   };
 
+  removeFolder = () => {
+    this.props.removeFolder();
+    this.setState({
+      showPopup: false
+    });
+  };
+
+  deleteImages = () => {
+    this.props.deleteImages();
+    {
+      this.setState({
+        showPopup: false
+      });
+    }
+  };
+
+  moveImagesTrue = () => {
+    this.setState({
+      moveImages: true
+    });
+  };
+
+  moveImagesFalse = () => {
+    this.setState({
+      moveImages: false
+    });
+  };
+
+  moveImages = (e) => 
+  {
+    this.moveImagesFalse()
+    this.setState({
+      showPopup: false
+    })
+    this.props.moveSelectedImages(e)
+  }
+
+  renderPopup = () => {
+    const { popupType } = this.state;
+    if (popupType === "createFolder") {
+      return (
+        <div>
+          <form id="showPopup">
+            <input
+              autoFocus
+              required
+              name="name"
+              type="text"
+              label="name"
+              placeholder="Folder Name"
+              id="folderNameInput"
+              value={this.props.searchTerm}
+              onChange={this.updateFolderName}
+            />
+            <input className="submit" onClick={this.addFolder} type="submit" />
+          </form>
+        </div>
+      );
+    } else if (popupType === "deleteFolder") {
+      return (
+        <div>
+          <p>
+            Delete this folder?(Images will be returned to the parent folder)
+          </p>
+          <button className="export" onClick={this.removeFolder}>
+            Delete
+          </button>
+          <button className="export" onClick={this.showPopup}>
+            Cancel
+          </button>
+        </div>
+      );
+    } else if (popupType === "deleteImage") {
+      return (
+        <div>
+          <p>Remove selected images?</p>
+          <button className="export" onClick={this.deleteImages}>
+            Remove
+          </button>
+          <button className="export" onClick={this.showPopup}>
+            Cancel
+          </button>
+        </div>
+      );
+    } else if(popupType === "moveImage"){
+      return (
+        <div>
+          <p>Click move and then on a folder to move selected images</p>
+          {!this.state.moveImages ? (
+            <button className="export" onClick={this.moveImagesTrue}>
+              Move
+            </button>
+          ) : (
+            <button className="highlightExport" onClick={this.moveImagesFalse}>
+              Cancel Move
+            </button>
+          )}
+        </div>
+      );
+    }
+  };
+
+  selectAll = () =>
+  {
+    const nonSelectedImages = this.props.images.filter(image => image.image !== this.props.selectedImage.image)
+    if (nonSelectedImages.length > 0) {
+      this.props.highlightAllImages(nonSelectedImages);
+    };
+  }
+
   render() {
     return (
       <div className="sidebar">
         <h4 id="scrollBarTitle">Image Viewer</h4>
         <FileBrowser
+          moveSelectedImages={this.props.moveSelectedImages}
           changeSelectedFolder={this.props.changeSelectedFolder}
           selectedFolder={this.props.selectedFolder}
           virtualFolders={this.props.virtualFolders}
           openFolder={this.props.openFolder}
           images={this.props.unfiltered}
+          moveImages={this.moveImages}
+          moveImagesVal={this.state.moveImages}
         />
         <div className="sideBarButtons">
-          <button className="sidebarButton">
-            <img className="sidebarButtonImage" src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/create_images_folder.jpg" />
+          <button className="sidebarButton" onClick={this.showPopup}>
+            <img
+              id="createFolder"
+              className="sidebarButtonImage"
+              src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/create_images_folder.jpg"
+            />
           </button>
-          <button className="sidebarButton">
-            <img className="sidebarButtonImage" src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/delete_folder.jpg" />
+          {this.props.selectedFolder.folderId !== 0 ? (
+            <button className="sidebarButton" onClick={this.showPopup}>
+              <img
+                id="deleteFolder"
+                className="sidebarButtonImage"
+                src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/delete_folder.jpg"
+              />
+            </button>
+          ) : (
+            <button className="sidebarButton">
+              <img
+                id="deleteFolder"
+                className="sidebarButtonImageFalse"
+                src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/delete_folder.jpg"
+              />
+            </button>
+          )}
+          <button className="sidebarButton" onClick={this.showPopup}>
+            <img
+              id="deleteImage"
+              className="sidebarButtonImage"
+              src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/delete_Image.jpg"
+            />
           </button>
-          <button className="sidebarButton">
-            <img className="sidebarButtonImage" src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/delete_Image.jpg" />
-          </button>
-          <button className="sidebarButton">
-            <img className="sidebarButtonImage" src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/move_image.jpg" />
+          <button className="sidebarButton" onClick={this.showPopup}>
+            <img
+              id="moveImage"
+              className="sidebarButtonImage"
+              src="file:////Users/flatironschool/ali_flatiron/electron-image-flow/public/sidebarButtons/move_image.jpg"
+            />
           </button>
         </div>
+
+        {this.state.showPopup ? this.renderPopup() : null}
+        <button className="export" onClick={this.props.export}>
+          Export
+        </button>
         <input
           id="tagSearch"
           type="search"
@@ -136,33 +299,9 @@ class Sidebar extends Component {
           onChange={this.props.updateSearchTerm}
           value={this.props.searchTerm}
         />
-
-        {this.state.newFolderPopup ? (
-          <div>
-            <button onClick={this.showPopup}>Create Folder</button>
-              <button className="export" onClick={this.props.export}>Export</button>
-            <form id="newFolderPopup">
-              <input
-                autoFocus
-                required
-                name="name"
-                type="text"
-                label="name"
-                placeholder="Folder Name"
-                id="folderNameInput"
-                value={this.props.searchTerm}
-                onChange={this.updateFolderName}
-              />
-              <input
-                className="submit"
-                onClick={this.addFolder}
-                type="submit"
-              />
-            </form>
-          </div>
-        ) : (
-          <button onClick={this.showPopup}>Create Folder</button>
-          )}
+        <div>
+          <button className="export" onClick={this.selectAll}>Select all</button>
+        </div>
         <div id="imageRailBorder">
           <div id="imageRail">{this.mapImages()}</div>
         </div>

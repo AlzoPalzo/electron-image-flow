@@ -196,6 +196,13 @@ class Workspace extends Component {
     }
   };
 
+  highlightAllImages = (images) =>
+  {
+    this.setState({
+      highlightedImages: images
+    })
+  }
+
   resetHighlighted = () => {
     this.setState({
       highlightedImages: []
@@ -292,9 +299,78 @@ class Workspace extends Component {
 
   }
 
+  getChildren = (parentFolder, folders = []) =>
+  {
+    const children = this.state.virtualFolders.filter(folder => folder.folderLocation === parentFolder.folderId)
+    let newFolders = folders.concat(children)
+    if (children.length > 0) {
+      for (let i = 0; i < children.length; i++) {
+        newFolders = newFolders.concat(this.getChildren(children[i]))
+      }
+    }
+    return newFolders
+  }
+
+  removeFolder = () =>
+  {
+    const {selectedFolder, virtualFolders} = this.state
+    const parentFolder = virtualFolders.find(folder => folder.folderId === selectedFolder.folderLocation)
+    const children = this.getChildren(this.state.selectedFolder)
+    const childrenIds = children.map(folder => folder.folderId)
+
+    const images = [...this.state.images]
+    images.forEach(image => {
+      if (childrenIds.includes(image.folderLocation) || selectedFolder.folderId === image.folderLocation) {
+        image.folderLocation = parentFolder.folderLocation
+      }
+    })
+    let folders = [...virtualFolders]
+    folders = folders.filter(folder => !childrenIds.includes(folder.folderId) && folder.folderId !== selectedFolder.folderId)
+    this.setState({
+      selectedFolder: parentFolder,
+      virtualFolders: folders,
+      images: images,
+    })
+  }
+
+  deleteImages = () =>
+  {
+    const { selectedImage, highlightedImages, images, selectedFolder } = this.state;
+
+    const ids = highlightedImages.map(image => image.image)
+    ids.push(selectedImage.image)
+
+    let newImages = [...images]
+    newImages = newImages.filter(image => !ids.includes(image.image))
+    let newSelectedImage = selectedImage
+    const remainingImages = images.filter(image => image.folderLocation === selectedFolder.folderId && !ids.includes(image.image))
+    if (remainingImages.length > 0)
+    {
+      newSelectedImage = remainingImages[0]
+    }
+    this.setState({
+      images: newImages,
+      selectedImage: newSelectedImage,
+    })
+  }
+
+  moveSelectedImages = (e) =>
+  {
+    const targetId = parseInt(e.target.id.split('-folder')[1])
+    const targetFolder = this.state.virtualFolders.find(folder => folder.folderId === targetId)
+    const selectedImages = [this.state.selectedImage, ...this.state.highlightedImages]
+    const images = [...this.state.images]
+    selectedImages.forEach(image => image.folderLocation = targetId)
+    this.setState({
+      images: images,
+      selectedFolder: targetFolder,
+    })
+    // debugger
+  }
+
   export = () =>
   {
-    const {images, dir} = this.state
+    const {images} = this.state
 
     const fs = require('fs')
 
@@ -347,7 +423,11 @@ class Workspace extends Component {
               addFolder={this.addFolder}
               openFolder={this.openFolder}
               unfiltered={this.state.images}
+              removeFolder={this.removeFolder}
               export={this.export}
+              deleteImages={this.deleteImages}
+              moveSelectedImages={this.moveSelectedImages}
+              highlightAllImages={this.highlightAllImages}
             />
             <img
               id="selectedImage"
