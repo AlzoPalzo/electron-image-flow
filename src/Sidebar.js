@@ -164,7 +164,7 @@ class Sidebar extends Component {
     const { popupType } = this.state;
     if (popupType === "createFolder") {
       return (
-        <div>
+        <div className="popupDiv">
           <form id="showPopup">
             <input
               autoFocus
@@ -177,15 +177,17 @@ class Sidebar extends Component {
               value={this.props.searchTerm}
               onChange={this.updateFolderName}
             />
-            <input className="submit" onClick={this.addFolder} type="submit" />
+            <br/>
+            <input  style={{marginTop: "0.3rem", WebkitUserSelect: "none"}} className="export" onClick={this.addFolder} type="submit" />
           </form>
         </div>
       );
     } else if (popupType === "deleteFolder") {
       return (
-        <div>
-          <p>
-            Delete this folder?(Images will be returned to the parent folder)
+        <div className="popupDiv">
+          <p className="buttonInfo">
+            Delete this folder?(Images will be returned to the parent
+            folder)
           </p>
           <button className="export" onClick={this.removeFolder}>
             Delete
@@ -197,8 +199,8 @@ class Sidebar extends Component {
       );
     } else if (popupType === "deleteImage") {
       return (
-        <div>
-          <p>Remove selected images?</p>
+        <div className="popupDiv">
+          <p className="buttonInfo">Remove selected images?</p>
           <button className="export" onClick={this.deleteImages}>
             Remove
           </button>
@@ -209,14 +211,17 @@ class Sidebar extends Component {
       );
     } else if(popupType === "moveImage"){
       return (
-        <div>
-          <p>Click move and then on a folder to move selected images</p>
+        <div className="popupDiv">
+          <p className="buttonInfo">Click move and then on a folder to move selected images</p>
           {!this.state.moveImages ? (
             <button className="export" onClick={this.moveImagesTrue}>
               Move
             </button>
           ) : (
-            <button className="highlightExport" onClick={this.moveImagesFalse}>
+            <button
+              className="highlightExport"
+              onClick={this.moveImagesFalse}
+            >
               Cancel Move
             </button>
           )}
@@ -237,6 +242,13 @@ class Sidebar extends Component {
     return (
       <div className="sidebar">
         <h4 id="scrollBarTitle">Image Viewer</h4>
+        <button
+          style={{ marginBottom: "0.2rem" }}
+          className="export"
+          onClick={this.props.export}
+        >
+          Export
+        </button>
         <FileBrowser
           moveSelectedImages={this.props.moveSelectedImages}
           changeSelectedFolder={this.props.changeSelectedFolder}
@@ -289,18 +301,23 @@ class Sidebar extends Component {
         </div>
 
         {this.state.showPopup ? this.renderPopup() : null}
-        <button className="export" onClick={this.props.export}>
-          Export
-        </button>
+
         <input
           id="tagSearch"
           type="search"
           placeholder="Search by content"
           onChange={this.props.updateSearchTerm}
           value={this.props.searchTerm}
+        
         />
         <div>
-          <button className="export" onClick={this.selectAll}>Select all</button>
+          <button
+            style={{ marginBottom: "0.2rem" }}
+            className="export"
+            onClick={this.selectAll}
+          >
+            Select all
+          </button>
         </div>
         <div id="imageRailBorder">
           <div id="imageRail">{this.mapImages()}</div>

@@ -229,7 +229,7 @@ class Workspace extends Component {
   };
 
   addFolder = name => {
-    const { highlightedImages, selectedImage, images } = this.state;
+    const { highlightedImages, selectedImage, images, virtualFolders } = this.state;
     let highNames = [];
     let filteredImages = [];
     if (highlightedImages.length > 0) {
@@ -242,8 +242,16 @@ class Workspace extends Component {
       filteredImages = [selectedImage];
     }
     const depth = this.getDepth()
+    let newName = name
+    const folderNames = virtualFolders.filter(folder => folder.depth === depth).map(folder => folder.name)
+    if(folderNames.includes(name))
+    {
+      let d = new Date()
+      let time = d.getTime().toString().slice(5)
+      newName = name + `(${time})`
+    }
     const newFolder = {
-      name: name,
+      name: newName,
       folderId: this.state.folderUniqueId,
       folderLocation: selectedImage.folderLocation,
       open: true,
@@ -258,6 +266,7 @@ class Workspace extends Component {
     this.setState({
       virtualFolders: [...this.state.virtualFolders, newFolder],
       selectedFolder: newFolder,
+      searchTerm: "",
       folderUniqueId: this.state.folderUniqueId + 1
     });
   };
@@ -321,7 +330,7 @@ class Workspace extends Component {
     const images = [...this.state.images]
     images.forEach(image => {
       if (childrenIds.includes(image.folderLocation) || selectedFolder.folderId === image.folderLocation) {
-        image.folderLocation = parentFolder.folderLocation
+        image.folderLocation = parentFolder.folderId
       }
     })
     let folders = [...virtualFolders]

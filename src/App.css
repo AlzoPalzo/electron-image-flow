@@ -245,6 +245,7 @@ body {
   margin-bottom: 0.5rem;
   max-width: 11rem;
   margin-right: 0.5rem;
+  -webkit-user-select: none;
 }
 #fileBrowser {
   width: 14rem;
@@ -347,7 +348,7 @@ body {
   outline: none;
 }
 
-.export:active{
+.export:active {
   border: 0.1rem inset #545454;
 }
 
@@ -358,4 +359,21 @@ body {
   margin-right: 0.2rem;
   -webkit-user-select: none;
   outline: none;
+}
+
+.popupDiv {
+  padding-bottom: 0.2rem;
+  /* border-left: outset 0.1rem darkgray; */
+  border-bottom: ridge rgb(99, 98, 98);
+   /* border-right: inset 0.1rem rgb(204, 204, 204); */
+   width: 12.5rem;
+}
+
+.buttonInfo {
+  margin-top: 0;
+  color: aliceblue;
+  margin-bottom: 0.2rem;
+  font-size: 0.8rem;
+  max-width: 12rem;
+  margin-left: 0.5rem
 }
