@@ -2,16 +2,24 @@ import React, { Component } from "react";
 
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import EditingBar from "./EditingBar";
 
 class Workspace extends Component {
   state = {
     dir: "",
     files: [],
     images: [],
-    virtual_folders: [],
+    virtualFolders: [
+      { name: "main", folderId: 0, folderLocation: 0, open: true, depth: 0 }
+    ],
+    selectedFolder: {},
     selectedImage: null,
-    zoom: 0
+    highlightedImages: [],
+    zoom: 0,
+    searchTerm: "",
+    folderUniqueId: 1
   };
+
 
   onDirChange = e => {
     if (e.target.files.length > 0) {
@@ -24,9 +32,11 @@ class Workspace extends Component {
 
       fs.readdir(dir, (err, files) => {
         if (err) throw err;
+        let newFiles = files.filter(file => !this.state.files.includes(file));
         this.setState(
           {
-            files: files
+            files: newFiles,
+            selectedFolder: this.state.virtualFolders[0]
           },
           () => {
             this.identifyImages();
@@ -46,13 +56,13 @@ class Workspace extends Component {
       const filepaths = files.map(file => "file:///" + dir + "/" + file);
       images = filepaths.filter(
         filepath =>
-          path.extname(filepath) === ".jpg" || path.extname === ".jpeg"
+          path.extname(filepath).toLowerCase() === ".jpg" || path.extname(filepath).toLowerCase() === ".jpeg"
       );
     }
     images.forEach(image => {
       this.tagImage(image);
     });
-  };
+  };n
 
   tagImage = image => {
     const fs = require("fs");
@@ -114,7 +124,6 @@ class Workspace extends Component {
       .then(resp => resp.json())
       .then(tagsContainer => {
         let tags = [];
-        console.log(tagsContainer);
         if (tagsContainer.tags) {
           tags = tagsContainer.tags
             .filter(tag => tag.confidence > 0.75)
@@ -122,13 +131,14 @@ class Workspace extends Component {
         } else {
           tags = ["untaggable"];
         }
+        const newImage = { image: image, tags: tags, folderLocation: 0 };
         this.state.selectedImage
           ? this.setState({
-              images: [...this.state.images, { image: image, tags: tags }]
+              images: [...this.state.images, newImage]
             })
           : this.setState({
-              images: [...this.state.images, { image: image, tags: tags }],
-              selectedImage: { image: image, tags: tags }
+              images: [...this.state.images, newImage],
+              selectedImage: newImage
             });
       });
   };
@@ -145,25 +155,298 @@ class Workspace extends Component {
     });
   };
 
+  updateSearchTerm = e => {
+    this.setState({
+      searchTerm: e.target.value
+    });
+  };
+
+  filterImages = () => {
+    let newImages = [];
+    if (this.state.images) {
+      newImages = this.state.images.filter(
+        image =>
+          image.tags.includes(this.state.searchTerm.toLowerCase()) &&
+          image.folderLocation === this.state.selectedFolder.folderId
+      );
+    }
+    console.log(this.state.selectedFolder);
+    if (newImages.length > 0) {
+      return newImages;
+    } else {
+      return this.state.images.filter(
+        image => image.folderLocation === this.state.selectedFolder.folderId
+      );
+    }
+  };
+
+  highlightImage = image => {
+    if (this.state.selectedImage.image !== image.image) {
+      if (this.state.highlightedImages.includes(image)) {
+        this.setState({
+          highlightedImages: this.state.highlightedImages.filter(
+            img => img !== image
+          )
+        });
+      } else {
+        this.setState({
+          highlightedImages: [...this.state.highlightedImages, image]
+        });
+      }
+    }
+  };
+
+  highlightAllImages = (images) =>
+  {
+    this.setState({
+      highlightedImages: images
+    })
+  }
+
+  resetHighlighted = () => {
+    this.setState({
+      highlightedImages: []
+    });
+  };
+
+  getDepth = () => {
+    let parents = [this.state.selectedFolder];
+    let aFolder = this.state.selectedFolder;
+    let main = false;
+    while (main === false) {
+      if (aFolder.folderId === 0) {
+        main = true;
+        break
+      }
+      aFolder = this.state.virtualFolders.find(
+        folder => folder.folderId === aFolder.folderLocation
+      );
+      if (aFolder) {
+        parents = [...parents, aFolder];
+      }
+    }
+    return parents.length;
+  };
+
+  addFolder = name => {
+    const { highlightedImages, selectedImage, images, virtualFolders } = this.state;
+    let highNames = [];
+    let filteredImages = [];
+    if (highlightedImages.length > 0) {
+      highNames = highlightedImages.map(image => image.image);
+      filteredImages = images.filter(
+        image =>
+          highNames.includes(image.image) || image.image === selectedImage.image
+      );
+    } else {
+      filteredImages = [selectedImage];
+    }
+    const depth = this.getDepth()
+    let newName = name
+    const folderNames = virtualFolders.filter(folder => folder.depth === depth).map(folder => folder.name)
+    if(folderNames.includes(name))
+    {
+      let d = new Date()
+      let time = d.getTime().toString().slice(5)
+      newName = name + `(${time})`
+    }
+    const newFolder = {
+      name: newName,
+      folderId: this.state.folderUniqueId,
+      folderLocation: selectedImage.folderLocation,
+      open: true,
+      depth: depth,
+    };
+    const parent = this.state.virtualFolders.find(folder => folder.folderId === selectedImage.folderLocation)
+    if(!parent.open){this.openFolder(parent.folderId)}
+    filteredImages.forEach(
+      image => (image.folderLocation = this.state.folderUniqueId)
+    );
+
+    this.setState({
+      virtualFolders: [...this.state.virtualFolders, newFolder],
+      selectedFolder: newFolder,
+      searchTerm: "",
+      folderUniqueId: this.state.folderUniqueId + 1
+    });
+  };
+
+  changeSelectedFolder = id => {
+    const newSelectedFolder = this.state.virtualFolders.find(
+      folder => folder.folderId === id
+    );
+
+    this.setState(
+      {
+        selectedFolder: newSelectedFolder
+      },
+      () => {}
+    );
+  };
+
+  openFolder = (id) =>
+  {
+    const targetFolder = this.state.virtualFolders.find(folder => folder.folderId === id)
+    const filterFolders = this.state.virtualFolders.filter(folder => folder !== targetFolder)
+    targetFolder.open = !targetFolder.open
+    this.setState({
+      virtualFolders: [...filterFolders, targetFolder]
+    })
+  }
+
+  createFilePath = (file, folders = []) =>
+  {
+    let fileFolder = this.state.virtualFolders.find(folder => file.folderLocation === folder.folderId)
+    folders.unshift(fileFolder.name)
+    if (fileFolder.folderId === 0){
+      const jointFolders = this.state.dir + '/' + folders.join("/");
+      return jointFolders
+    }
+    else{
+      return this.createFilePath(fileFolder, folders)
+    }
+
+  }
+
+  getChildren = (parentFolder, folders = []) =>
+  {
+    const children = this.state.virtualFolders.filter(folder => folder.folderLocation === parentFolder.folderId)
+    let newFolders = folders.concat(children)
+    if (children.length > 0) {
+      for (let i = 0; i < children.length; i++) {
+        newFolders = newFolders.concat(this.getChildren(children[i]))
+      }
+    }
+    return newFolders
+  }
+
+  removeFolder = () =>
+  {
+    const {selectedFolder, virtualFolders} = this.state
+    const parentFolder = virtualFolders.find(folder => folder.folderId === selectedFolder.folderLocation)
+    const children = this.getChildren(this.state.selectedFolder)
+    const childrenIds = children.map(folder => folder.folderId)
+
+    const images = [...this.state.images]
+    images.forEach(image => {
+      if (childrenIds.includes(image.folderLocation) || selectedFolder.folderId === image.folderLocation) {
+        image.folderLocation = parentFolder.folderId
+      }
+    })
+    let folders = [...virtualFolders]
+    folders = folders.filter(folder => !childrenIds.includes(folder.folderId) && folder.folderId !== selectedFolder.folderId)
+    this.setState({
+      selectedFolder: parentFolder,
+      virtualFolders: folders,
+      images: images,
+    })
+  }
+
+  deleteImages = () =>
+  {
+    const { selectedImage, highlightedImages, images, selectedFolder } = this.state;
+
+    const ids = highlightedImages.map(image => image.image)
+    ids.push(selectedImage.image)
+
+    let newImages = [...images]
+    newImages = newImages.filter(image => !ids.includes(image.image))
+    let newSelectedImage = selectedImage
+    const remainingImages = images.filter(image => image.folderLocation === selectedFolder.folderId && !ids.includes(image.image))
+    if (remainingImages.length > 0)
+    {
+      newSelectedImage = remainingImages[0]
+    }
+    this.setState({
+      images: newImages,
+      selectedImage: newSelectedImage,
+    })
+  }
+
+  moveSelectedImages = (e) =>
+  {
+    const targetId = parseInt(e.target.id.split('-folder')[1])
+    const targetFolder = this.state.virtualFolders.find(folder => folder.folderId === targetId)
+    const selectedImages = [this.state.selectedImage, ...this.state.highlightedImages]
+    const images = [...this.state.images]
+    selectedImages.forEach(image => image.folderLocation = targetId)
+    this.setState({
+      images: images,
+      selectedFolder: targetFolder,
+    })
+    // debugger
+  }
+
+  export = () =>
+  {
+    const {images} = this.state
+
+    const fs = require('fs')
+
+    for (let i = 0; i < images.length; i++) {
+        const imageDir = images[i].image.split('///')[1]
+        const splitImageDir = imageDir.split('/')
+        const imageName = splitImageDir[splitImageDir.length - 1]
+        const newImageFilePath = this.createFilePath(images[i])
+        const finalLoc = newImageFilePath + '/' + imageName
+
+        if(fs.existsSync(newImageFilePath))
+        {
+          fs.copyFileSync(imageDir, finalLoc)
+        }
+        else{
+          fs.mkdirSync(newImageFilePath, {recursive: true})
+          fs.copyFileSync(imageDir, finalLoc);
+        }
+    }  
+  }
+
   render() {
-    const { dir, images, virtual_folders, selectedImage, zoom } = this.state;
+    const {
+      dir,
+      images,
+      virtualFolders,
+      selectedImage,
+      zoom,
+      selectedFolder,
+      highlightedImages
+    } = this.state;
     return (
       <div>
         <Header onDirChange={this.onDirChange} />
         {dir !== "" && images.length > 0 ? (
           <div>
             <Sidebar
-              images={images}
+              searchTerm={this.props.searchTerm}
+              updateSearchTerm={this.updateSearchTerm}
+              images={this.filterImages()}
               dir={dir}
-              virtual_folders={virtual_folders}
+              virtualFolders={virtualFolders}
               changeSelectedImage={this.changeSelectedImage}
               selectedImage={selectedImage}
+              selectedFolder={selectedFolder}
+              changeSelectedFolder={this.changeSelectedFolder}
+              highlightedImages={highlightedImages}
+              highlightImage={this.highlightImage}
+              resetHighlighted={this.resetHighlighted}
+              addFolder={this.addFolder}
+              openFolder={this.openFolder}
+              unfiltered={this.state.images}
+              removeFolder={this.removeFolder}
+              export={this.export}
+              deleteImages={this.deleteImages}
+              moveSelectedImages={this.moveSelectedImages}
+              highlightAllImages={this.highlightAllImages}
             />
             <img
               id="selectedImage"
               className={"selectedImage" + zoom}
               src={selectedImage.image}
               alt={selectedImage.tags[0]}
+            />
+            <EditingBar
+              changeZoom={this.changeZoom}
+              zoom={this.state.zoom}
             />
           </div>
         ) : null}

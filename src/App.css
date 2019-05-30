@@ -19,17 +19,16 @@
   color: white;
 }
 
-
 .sidebar {
   height: 95%;
   margin-top: 3.5rem;
-  width: 10rem;
+  width: 13rem;
   position: fixed;
   z-index: 1;
   top: 0;
   left: 0;
   background-color: rgb(70, 69, 68);
-  overflow-x: hidden;
+  overflow: hidden;
   border-right-style: ridge;
   border-right-color: #313030;
   border-right-width: 0.3rem;
@@ -38,7 +37,9 @@
   animation-duration: 1s;
 }
 
-
+#scrollBarTitle {
+  color: aliceblue;
+}
 
 #header {
   width: 100%;
@@ -50,21 +51,15 @@
   z-index: 1;
 }
 
-#img{
-  max-width: 400px;
-}
-
-
 body {
   background-color: #252525;
   overflow: auto;
 }
 
-
 .tileContainer {
-  margin-left: 0.7rem;
-  height: 6rem;
-  width: 6rem;
+  margin-left: 0.75rem;
+  height: 9rem;
+  width: 9rem;
   position: relative;
   margin-top: 0.4rem;
   border-style: ridge;
@@ -73,14 +68,18 @@ body {
   box-shadow: 0.2rem 0.1rem;
   background-color: rgb(84, 86, 88);
   animation-name: fadeIn;
-  animation-duration: 1s;
+  animation-duration: 0.3s;
   border-radius: 4px;
 }
 
+.tileContainer:hover {
+  cursor: pointer;
+}
+
 .selected {
-  margin-left: 0.7rem;
-  height: 6rem;
-  width: 6rem;
+  margin-left: 0.75rem;
+  height: 9rem;
+  width: 9rem;
   position: relative;
   margin-top: 0.4rem;
   border-style: ridge;
@@ -93,15 +92,21 @@ body {
   border-radius: 4px;
 }
 
+.highlighted {
+  box-shadow: 0.2rem 0.1rem rgb(78, 78, 78);
+  border-color: rgb(168, 166, 166);
+}
+
 .tileImage {
-  max-width: 6rem;
-  max-height: 6rem;
+  max-width: 9rem;
+  max-height: 9rem;
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
   margin: auto;
+  -webkit-user-select: none;
 }
 
 #selectedImage {
@@ -114,8 +119,9 @@ body {
   top: 0;
   bottom: 0;
   margin: auto;
+  box-shadow: 0 0.2rem 0.2rem 0.1rem rgb(0, 0, 0),
+    0 0.2rem 0.2rem 0.1rem rgb(253, 253, 253);
 }
-
 
 .selectedImage-6 {
   max-width: 46%;
@@ -182,8 +188,6 @@ body {
   max-height: 180%;
 }
 
-
-
 @keyframes fadeIn {
   0% {
     opacity: 0;
@@ -197,6 +201,179 @@ body {
   background-color: #252525;
   padding-top: 1px;
   padding-bottom: 0.5rem;
-  width: 8rem;
-  margin-left: 0.5rem;
+  width: 11rem;
+  margin-left: 0.8rem;
+  overflow-x: hidden;
+  height: 42.6rem;
+}
+
+.editingBar {
+  position: fixed;
+  bottom: 4rem;
+  right: 4rem;
+  background-color: rgb(65, 66, 66) !important;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.editingButton {
+  background-color: grey;
+  border: outset rgb(99, 98, 98);
+  color: rgb(0, 0, 0);
+  border-radius: 4px;
+  outline: 0;
+}
+
+.editingButton:hover {
+  cursor: pointer;
+}
+
+.editingButtonShaded {
+  background-color: grey;
+  border: inset rgb(99, 98, 98);
+  color: rgb(0, 0, 0);
+  border-radius: 4px;
+  outline: 0;
+}
+
+.editingButton:active {
+  border: inset rgb(99, 98, 98);
+}
+
+#tagSearch {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  max-width: 11rem;
+  margin-right: 0.5rem;
+  -webkit-user-select: none;
+}
+#fileBrowser {
+  width: 14rem;
+  min-height: 3rem;
+  border-top: ridge rgb(99, 98, 98);
+  border-bottom: ridge rgb(99, 98, 98);
+}
+
+#fileBrowserRail {
+  background-color: #252525;
+  width: 11rem;
+  height: 10rem;
+  margin-left: 0.8rem;
+  overflow: scroll;
+}
+
+#imageRailBorder {
+  width: 14rem;
+  margin-bottom: 1rem;
+
+  border-top: ridge rgb(99, 98, 98);
+  border-bottom: ridge rgb(99, 98, 98);
+}
+
+.folderIcon {
+  width: 1rem;
+}
+
+.folderText {
+  top: 0rem;
+  color: aliceblue;
+  font-size: 0.7rem;
+  margin-top: 0;
+
+  padding-top: 0.1rem;
+  padding-left: 0.3rem;
+}
+
+.childFolders {
+  display: -webkit-box;
+  max-height: 2.5rem;
+}
+
+.currentFolders {
+  display: -webkit-box;
+}
+.folderContainer {
+  /* padding-bottom: 2.9rem; */
+  height: 1.1rem;
+  width: 11rem;
+  display: -webkit-box;
+  overflow: hidden;
+  border-bottom: solid rgb(129, 128, 128) 1px;
+  -webkit-user-select: none;
+}
+
+.selectedFolder {
+  background-color: rgb(136, 135, 135);
+}
+.imageCount {
+  margin: 0;
+  color: aliceblue;
+  font-size: 0.65rem;
+  padding-right: 0.1rem;
+  padding-top: 0.1rem;
+  min-width: 2rem;
+}
+
+.sidebarButton {
+  background-color: rgb(70, 69, 68);
+  margin-top: 0.3rem;
+  margin-left: 0.1rem;
+  display: contents;
+}
+
+.sidebarButtonImage {
+  max-width: 2.4rem;
+  padding: 0.2rem;
+  margin: 0.1rem;
+  border: 0.1rem outset #545454;
+}
+
+.sidebarButtonImageFalse {
+  max-width: 2.4rem;
+  padding: 0.2rem;
+  margin: 0.1rem;
+  border: 0.1rem inset #545454;
+}
+
+.sidebarButtonImage:active {
+  border: 0.1rem inset #545454;
+}
+
+.export {
+  background: #545454;
+  color: aliceblue;
+  border: 0.1rem outset #545454;
+  margin-right: 0.2rem;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.export:active {
+  border: 0.1rem inset #545454;
+}
+
+.highlightExport {
+  background: #545454;
+  color: aliceblue;
+  border: 0.1rem outset #c0c0c0;
+  margin-right: 0.2rem;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.popupDiv {
+  padding-bottom: 0.2rem;
+  /* border-left: outset 0.1rem darkgray; */
+  border-bottom: ridge rgb(99, 98, 98);
+   /* border-right: inset 0.1rem rgb(204, 204, 204); */
+   width: 12.5rem;
+}
+
+.buttonInfo {
+  margin-top: 0;
+  color: aliceblue;
+  margin-bottom: 0.2rem;
+  font-size: 0.8rem;
+  max-width: 12rem;
+  margin-left: 0.5rem
 }
