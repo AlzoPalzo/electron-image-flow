@@ -3,6 +3,19 @@
 
 If you would just like to view a demo you can do so here https://youtu.be/ssArcIiOV1g
 
+After cloning and downloading run the following commands:
+
+  * yarn add electron electron-builder --dev
+  
+  * yarn add wait-on concurrently --dev<br>
+  yarn add electron-is-dev
+  
+  * yarn add @rescripts/cli @rescripts/rescript-env --dev
+  
+  * yarn add electron-builder typescript --dev
+
+
+
 ## Available Scripts
 
 In the project directory, you can run:
