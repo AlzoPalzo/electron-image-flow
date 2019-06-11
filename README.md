@@ -1,4 +1,3 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 #### Please note the variable "key" in Workspace.js is just an example.<br> This app requires a payed API key from Microsofts cognitive services <a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/">computer vision service.<a/>
 
