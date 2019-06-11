@@ -29,4 +29,4 @@ opens an application window allowing you to use the app with chrome dev tools op
 
 Creates a packages the app into a desktop application.<br>
 
-By default the application is packaged for both mac and windows. Please note howeveer that the app is currently only built to work with Macs.
+By default the application is packaged for both mac and windows. Please note however that the app is currently only built to work with Macs.
