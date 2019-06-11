@@ -2,6 +2,8 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 #### Please note the variable key in Workspace.js is just an example.<br> This app requires a payed API key from Microsofts cognitive services computer vision service.
 
+If you would just like to view a demo you can do so here https://youtu.be/ssArcIiOV1g
+
 ## Available Scripts
 
 In the project directory, you can run:
